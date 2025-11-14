@@ -1,0 +1,20 @@
+<odoo>
+    <!-- List view -->
+    <record id="cw_customer_list" model="ir.ui.view">
+        <field name="name">cw.customer.list</field>
+        <field name="model">cw.customer</field>
+        <field name="arch" type="xml">
+            <list string="Customers">
+                <field name="id" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Action to open customer views -->
+        <record id="action_customer" model="ir.actions.act_window">
+            <field name="name">Customers</field>
+            <field name="res_model">cw.customer</field>
+            <field name="view_mode">list</field>
+            <field name="view_id" ref="cw_customer_list"/>
+        </record>
+</odoo>

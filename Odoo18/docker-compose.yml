@@ -1,0 +1,25 @@
+services:
+  odoo:
+    image: odoo:18.0
+    container_name: odoo18
+    restart: always
+    ports:
+      - "8069:8069"
+    environment:
+      - HOST=postgreSQL
+      - PORT=5432
+      - USER=odoo
+      - PASSWORD=admin
+    volumes:
+      - odoo18-web-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons/workshop
+      - ./config:/etc/odoo
+    networks:
+      - odoo-workshop-net
+
+volumes:
+  odoo18-web-data:
+
+networks:
+  odoo-workshop-net:
+    external: true

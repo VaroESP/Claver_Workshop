@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgreSQL
+    restart: always
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - odoo-workshop-net
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgAdmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - odoo-workshop-net
+
+volumes:
+   postgres-data:
+
+networks:
+  odoo-workshop-net:
+    external: true
