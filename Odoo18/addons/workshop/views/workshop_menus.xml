@@ -1,0 +1,11 @@
+<odoo>
+    <data>
+        <menuitem id="menu_main" name="Workshop" sequence="1" />
+        <menuitem id="menu_customers" name="Customers" parent="menu_main" action="action_customer"
+            sequence="10" />
+        <menuitem id="menu_vehicles" name="Vehicles" parent="menu_main" action="action_vehicle"
+            sequence="20" />
+        <menuitem id="menu_products" name="Products" parent="menu_main" action="action_product"
+            sequence="30" />
+    </data>
+</odoo>

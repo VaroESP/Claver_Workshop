@@ -1,0 +1,64 @@
+<odoo>
+    <!-- List view -->
+    <record id="workshop_customer_list" model="ir.ui.view">
+        <field name="name">workshop.customer.list</field>
+        <field name="model">workshop.customer</field>
+        <field name="arch" type="xml">
+            <list string="Customers">
+                <field name="name" />
+                <field name="create_date" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="workshop_customer_form" model="ir.ui.view">
+        <field name="name">workshop.customer.form</field>
+        <field name="model">workshop.customer</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div>
+                        <h1>
+                            <field name="name" placeholder="Name of client" />
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="create_date" invisible="not id" />
+                    </group>
+                    <notebook colspan="4" invisible="not id">
+                        <page string="Address" name="address" autofocus="autofocus">
+                            <form>
+                                <group>
+                                    <group>
+                                        <field name="street" placeholder="Street" />
+                                        <group>
+                                            <div><field name="postal_code" placeholder="Postal code"/></div>
+                                        </group>
+                                        <group>
+                                            <div><field name="city" placeholder="City" /></div>
+                                        </group>
+                                        <group>
+                                            <div><field name="state_id" placeholder="State"/></div>
+                                        </group>
+                                        <group>
+                                            <div><field name="country_id" placeholder="Country"/></div>
+                                        </group>
+                                    </group>
+                                </group>
+                            </form>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open customer views -->
+    <record id="action_customer" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="res_model">workshop.customer</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="workshop_customer_list" />
+    </record>
+</odoo>
