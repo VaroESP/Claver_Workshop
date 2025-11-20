@@ -5,10 +5,9 @@
         <field name="model">workshop.vehicle</field>
         <field name="arch" type="xml">
             <list string="Vehicles">
-                <field name="customer_id" />
+                <field name="name" />
                 <field name="plate" />
-                <field name="brand" />
-                <field name="model" />
+                <field name="customer_id" />
             </list>
         </field>
     </record>
@@ -23,14 +22,27 @@
                     <group class="oe_title">
                         <group>
                             <h1 class="o_row">
-                                <field name="brand" />
-                                <field name="model" />
+                                <field name="brand" placeholder="Brand" />
+                                <field name="model" placeholder="Model" />
                             </h1>
                         </group>
+                        <group></group>
                         <group>
+                            <field name="customer_id" />
                             <field name="plate" />
                         </group>
                     </group>
+                    <notebook colspan="4" invisible="not id">
+                        <page string="Maintenance" name="maintenance" autofocus="autofocus">
+                            <field name="maintenance_ids" mode="list"
+                                domain="[('vehicle_id', '=', vehicle_id)]">
+                                <list>
+                                    <field name="create_date" string="Create date" />
+                                    <field name="create_uid" string="Mechanic" />
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

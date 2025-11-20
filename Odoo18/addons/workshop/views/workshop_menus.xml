@@ -1,11 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <menuitem id="menu_main" name="Workshop" sequence="1" />
-        <menuitem id="menu_customers" name="Customers" parent="menu_main" action="action_customer"
-            sequence="10" />
-        <menuitem id="menu_vehicles" name="Vehicles" parent="menu_main" action="action_vehicle"
-            sequence="20" />
-        <menuitem id="menu_products" name="Products" parent="menu_main" action="action_product"
-            sequence="30" />
+        <menuitem id="menu_workshop_main" name="Workshop" sequence="1" />
+
+        <menuitem id="menu_customers" name="Customers" parent="menu_workshop_main" sequence="10">
+            <menuitem id="customers_list" name="Customers list" action="action_customer"
+                sequence="10" />
+            <menuitem id="vehicles_list" name="Vehicles list" action="action_vehicle"
+                sequence="20" />
+        </menuitem>
+
+        <menuitem id="menu_employees" name="Employees" parent="menu_workshop_main" sequence="20">
+            <menuitem id="employees_list" name="Employees list" action="action_employee"
+                sequence="10" />
+        </menuitem>
+
+        <menuitem id="menu_products" name="Products" parent="menu_workshop_main"
+            action="action_product" sequence="30" />
     </data>
 </odoo>
