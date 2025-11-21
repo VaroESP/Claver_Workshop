@@ -38,6 +38,7 @@ class Customer(models.Model):
     vehicle_ids = fields.One2many(
         "workshop.vehicle", "customer_id", string="Customer's Vehicles"
     )
+    vehicle_count = fields.Integer(string="Vehicles", compute="_compute_count")
 
     # ================ #
     # ONCHANGE METHODS #
@@ -49,6 +50,15 @@ class Customer(models.Model):
             self.country_id = self.state_id.country_id
         else:
             self.country_id = False
+            
+    # ================ #
+    # COMPUTED METHODS #
+    # ================ #
+
+    @api.depends("vehicle_ids")
+    def _compute_count(self):
+        for customer in self:
+            customer.vehicle_count = len(customer.vehicle_ids)
 
     # =============== #
     # HELPERS METHODS #
@@ -61,3 +71,17 @@ class Customer(models.Model):
                 return base64.b64encode(f.read())
         except Exception:
             return False
+        
+    # ============== #
+    # ACTION METHODS #
+    # ============== #
+    
+    def action_vehicle(self):
+        return{
+            'name': 'Vehicles',
+            'type': 'ir.actions.act_window',
+            'res_model': 'workshop.vehicle',
+            'view_mode': 'list,form',
+            'domain': [('customer_id', '=', self.id)],
+            'target': 'current',
+        }

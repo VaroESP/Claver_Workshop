@@ -58,35 +58,73 @@
             <form>
                 <sheet>
                     <field name="avatar_128" widget="image" class="oe_avatar" />
-                    <group>
-                        <group>
-                            <h1>
-                                <div>
-                                    <field name="name" placeholder="Name" />
-                                </div>
-                            </h1>
-                        </group>
-                        <group />
-                        <group name="address" string="Address">
+                    <div name="button_box">
+                        <button name="action_vehicle"
+                            type="object"
+                            invisible="vehicle_count == 0"
+                            icon="fa-car">
+                            <field name="vehicle_count" readonly="1" widget="statinfo" />
+                        </button>
+                    </div>
+                    <div>
+                        <h1>
                             <div>
-                                <field name="street" placeholder="Street" />
-                                <div class="col-6 o_row">
+                                <field name="name" placeholder="Name" />
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="address" string="Address">
+                            <field name="street" placeholder="Street" />
+                            <group>
+                                <div>
                                     <field name="postal_code" placeholder="Postal Code" />
+                                </div>
+                            </group>
+                            <group>
+                                <div>
                                     <field name="city" placeholder="City" />
                                 </div>
-                                <div class="col-6 o_row">
+                            </group>
+                            <group>
+                                <div>
                                     <field name="state_id" placeholder="State" />
+                                </div>
+                            </group>
+                            <group>
+                                <div>
                                     <field name="country_id" placeholder="Country" />
                                 </div>
-                            </div>
-                        </group>
-                        <group name="contact" string="Contact">
-                            <group>
-                                <field name="email" />
-                                <field name="phone" />
                             </group>
                         </group>
+                        <group name="contact" string="Contact">
+                            <field name="email" />
+                            <field name="phone" />
+                        </group>
                     </group>
+                    <notebook colspan="4" invisible="not id">
+                        <page string="Vehicles" name="vehicles" autofocus="autofocus">
+                            <field name="vehicle_ids" mode="kanban">
+                                <kanban>
+                                    <field name="name" />
+                                    <field name="plate" />
+                                    <templates>
+                                        <t t-name="card" class="flex-row">
+                                            <main class="p-2">
+                                                
+                                                    <strong>
+                                                        <field name="name" />
+                                                    </strong>
+                                                    <field name="plate" />
+                                                
+
+                                            </main>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -97,6 +135,6 @@
         <field name="name">Customers</field>
         <field name="res_model">workshop.customer</field>
         <field name="view_mode">list,form,kanban</field>
-        <field name="view_id" ref="view_workshop_customer_list" />
+        <field name="view_id" ref="view_workshop_customer_kanban" />
     </record>
 </odoo>

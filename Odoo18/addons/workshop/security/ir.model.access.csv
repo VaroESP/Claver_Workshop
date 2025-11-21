@@ -3,3 +3,4 @@ workshop.access_workshop_customer,access_workshop_customer,workshop.model_worksh
 workshop.access_workshop_employee,access_workshop_employee,workshop.model_workshop_employee,base.group_user,1,1,1,1
 workshop.access_workshop_product,access_workshop_product,workshop.model_workshop_product,base.group_user,1,1,1,1,1
 workshop.access_workshop_vehicle,access_workshop_vehicle,workshop.model_workshop_vehicle,base.group_user,1,1,1,1,1
+workshop.access_workshop_maintenance,access_workshop_maintenance,workshop.model_workshop_maintenance,base.group_user,1,1,1,1,1

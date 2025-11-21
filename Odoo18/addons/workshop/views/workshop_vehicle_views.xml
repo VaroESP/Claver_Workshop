@@ -19,27 +19,27 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <group class="oe_title">
+                    <field name="avatar_128" widget="image" class="oe_avatar" />
+                    <div class="oe_title mb24">
+
+                        <h1 class="o_row">
+                            <field name="brand" placeholder="Brand" invisible="id" />
+                            <field name="model" placeholder="Model" invisible="id" />
+                            <field name="name" invisible="not id" />
+                        </h1>
+                    </div>
+                    <group>
                         <group>
-                            <h1 class="o_row">
-                                <field name="brand" placeholder="Brand" />
-                                <field name="model" placeholder="Model" />
-                            </h1>
-                        </group>
-                        <group></group>
-                        <group>
-                            <field name="customer_id" />
                             <field name="plate" />
+                            <field name="last_maintenance" />
+                            <field name="next_maintenance" />
+                            <field name="brand" placeholder="Brand" invisible="not id" />
+                            <field name="model" placeholder="Model" invisible="not id" />
                         </group>
                     </group>
                     <notebook colspan="4" invisible="not id">
                         <page string="Maintenance" name="maintenance" autofocus="autofocus">
-                            <field name="maintenance_ids" mode="list"
-                                domain="[('vehicle_id', '=', vehicle_id)]">
-                                <list>
-                                    <field name="create_date" string="Create date" />
-                                    <field name="create_uid" string="Mechanic" />
-                                </list>
+                            <field name="maintenance_ids" mode="list">
                             </field>
                         </page>
                     </notebook>
