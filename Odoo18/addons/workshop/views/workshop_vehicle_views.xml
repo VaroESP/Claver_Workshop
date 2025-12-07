@@ -20,26 +20,51 @@
             <form>
                 <sheet>
                     <field name="avatar_128" widget="image" class="oe_avatar" />
+                    <div name="button_box">
+                        <button name="action_maintenance"
+                            type="object"
+                            invisible="maintenance_count == 0"
+                            icon="fa-wrench">
+                            <field name="maintenance_count" readonly="1" widget="statinfo" />
+                        </button>
+                    </div>
                     <div class="oe_title mb24">
-
                         <h1 class="o_row">
                             <field name="brand" placeholder="Brand" invisible="id" />
                             <field name="model" placeholder="Model" invisible="id" />
                             <field name="name" invisible="not id" />
                         </h1>
                     </div>
+                    <div>
+                        <strong>
+                            <label for="vehicle_category" string="Vehicle Type" class="me-3" />
+                        </strong>
+                        <field name="vehicle_category" string="Vehicle type" />
+                    </div>
                     <group>
                         <group>
                             <field name="plate" />
-                            <field name="last_maintenance" />
-                            <field name="next_maintenance" />
                             <field name="brand" placeholder="Brand" invisible="not id" />
                             <field name="model" placeholder="Model" invisible="not id" />
+                        </group>
+                        <group>
+                            <field name="last_maintenance" />
+                            <field name="next_maintenance" readonly="0" />
                         </group>
                     </group>
                     <notebook colspan="4" invisible="not id">
                         <page string="Maintenance" name="maintenance" autofocus="autofocus">
-                            <field name="maintenance_ids" mode="list">
+                            <field name="maintenance_ids" mode="list"
+                                context="{'default_vehicle_id': id, 'clear_defaults': True}">
+                                <list string="Maintenances">
+                                    <field name="name" width="25%" force_save='1' />
+                                    <field name="date_request" string="Date request" width="25%"
+                                        force_save='1' />
+                                    <field name="mechanic_id"
+                                        string="Mechanic" width="25%" force_save='1' />
+                                    <field name="date_delivery" string="Date delivery" width="25%"
+                                        force_save='1' />
+                                </list>
                             </field>
                         </page>
                     </notebook>

@@ -7,9 +7,9 @@
             <list string="Maintenances">
                 <field name="name" width="20%" />
                 <field name="vehicle_id" width="20%" />
-                <field name="entry_date" string="Entry Date" width="20%" />
-                <field name="responsible_mechanic_id" string="Responsible mechanic" width="20%" />
-                <field name="departure_date" string="Departure Date" width="20%" />
+                <field name="date_request" string="Date request" width="20%" />
+                <field name="mechanic_id" string="Mechanic" width="20%" />
+                <field name="date_delivery" string="Date delivery" width="20%" />
             </list>
         </field>
     </record>
@@ -30,10 +30,18 @@
                             <field name="responsible_mechanic_id" />
                         </group>
                         <group>
-                            <field name="entry_date" force_save="1" />
-                            <field name="departure_date" force_save="1" />
+                            <field name="date_request" force_save="1" />
+                            <field name="date_delivery" force_save="1" />
                         </group>
                     </group>
+                    <notebook colspan="4" invisible="not id">
+                        <page string="Products" name="products" autofocus="autofocus">
+                            <field name="product_ids" mode="list">
+                                <list string="Products">
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

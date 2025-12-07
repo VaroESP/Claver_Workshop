@@ -65,12 +65,16 @@
                             icon="fa-car">
                             <field name="vehicle_count" readonly="1" widget="statinfo" />
                         </button>
+                        <button name="action_maintenance"
+                            type="object"
+                            invisible="maintenance_count == 0"
+                            icon="fa-wrench">
+                            <field name="maintenance_count" readonly="1" widget="statinfo" />
+                        </button>
                     </div>
                     <div>
                         <h1>
-                            <div>
-                                <field name="name" placeholder="Name" />
-                            </div>
+                            <field name="name" placeholder="Name" />
                         </h1>
                     </div>
                     <group>
@@ -111,12 +115,12 @@
                                     <templates>
                                         <t t-name="card" class="flex-row">
                                             <main class="p-2">
-                                                
-                                                    <strong>
-                                                        <field name="name" />
-                                                    </strong>
-                                                    <field name="plate" />
-                                                
+
+                                                <strong>
+                                                    <field name="name" />
+                                                </strong>
+                                                <field name="plate" />
+
 
                                             </main>
                                         </t>

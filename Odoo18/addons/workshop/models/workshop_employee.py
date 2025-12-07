@@ -6,29 +6,28 @@ import base64
 
 
 class Employee(models.Model):
-    _name = "workshop.employee"
+    _inherit = "hr.employee"
     _description = "Employee model"
 
-    # ====== #
-    # FIELDS #
-    # ====== #
+    # == FIELDS == #
 
-    name = fields.Char(string="Name", required=True)
-    street = fields.Char(string="Street")
-    postal_code = fields.Char(string="Postal Code")
-    city = fields.Char(string="City")
-    state_id = fields.Many2one(
+    #name = fields.Char(string="Name", required=True)
+    is_worshop_employee = fields.Boolean(string="Workshop employee")
+    #street = fields.Char(string="Street")
+    #postal_code = fields.Char(string="Postal Code")
+    #city = fields.Char(string="City")
+    '''state_id = fields.Many2one(
         "res.country.state",
         string="State",
         ondelete="restrict",
         domain="[('country_id', '=?', country_id)]",
         store=True,
-    )
-    country_id = fields.Many2one(
+    )'''
+    '''country_id = fields.Many2one(
         "res.country", string="Country", ondelete="restrict", store=True
-    )
-    phone = fields.Char(string="Phone")
-    email = fields.Char(string="Email")
+    )'''
+    #phone = fields.Char(string="Phone")
+    #email = fields.Char(string="Email")
     avatar_128 = fields.Image(
         string="avatar 128",
         max_width=128,
@@ -36,10 +35,17 @@ class Employee(models.Model):
         store=True,
         default=lambda self: self._get_default_avatar(),
     )
+    user_id = fields.Many2one("res.users", string="UserId")
+    employee_type = fields.Selection([
+        ('mechanic', 'Mechanic'),
+        ('apprentice', 'Apprentice'),
+        ('administrative', 'Administrative'),
+        ('workshop_manager', 'Workshop Manager'),
+    ], string="Employee type", default="mechanic")
+    is_available = fields.Boolean(string='Available', default=True)
+    maintenance_ids = fields.One2many('workshop.maintenance', 'mechanic_id', string="Mechanic's maintenances")
 
-    # ================ #
-    # ONCHANGE METHODS #
-    # ================ #
+    # == ONCHANGE METHODS == #
 
     @api.onchange("state_id")
     def _onchange_state(self):
@@ -48,9 +54,7 @@ class Employee(models.Model):
         else:
             self.country_id = False
 
-    # =============== #
-    # HELPERS METHODS #
-    # =============== #
+    # == HELPERS METHODS == #
 
     @api.model
     def _get_default_avatar(self):
@@ -60,10 +64,7 @@ class Employee(models.Model):
         except Exception:
             return False
 
-    def _is_user(self):
-        pass
-
-    def _create_user_from_student(self):
+    def _create_user_from_employee(self):
         self.ensure_one()
         if self.user_id:
             return self.user_id
@@ -103,7 +104,7 @@ class Employee(models.Model):
                         6,
                         0,
                         [
-                            self.env.ref("base.group_employee").id,
+                            self.env.ref("base.group_user").id,
                         ],
                     )
                 ],
@@ -123,21 +124,11 @@ class Employee(models.Model):
         except Exception as e:
             raise ValidationError("No se pudo crear el usuario: %s" % str(e))
 
-    @api.model
-    def _get_default_avatar(self):
-        try:
-            with file_open("university/static/src/img/student_default.png", "rb") as f:
-                return base64.b64encode(f.read())
-        except Exception:
-            return False
-
-    # ============ #
-    # CRUD METHODS #
-    # ============ #
+    # == CRUD METHODS == #
 
     @api.model_create_multi
     def create(self, vals_list):
         employees = super(Employee, self).create(vals_list)
-        for student in employees:
-            student._create_user_from_student()
+        for employee in employees:
+            employee._create_user_from_employee()
         return employees
