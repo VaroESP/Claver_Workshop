@@ -18,7 +18,7 @@ class WorkshopMaintenanceLine(models.Model):
         string="Subtotal", compute="_compute_subtotal", store=True
     )
 
-    product_type = fields.Selection(related="product_id.detailed_type", string="Type")
+    product_type = fields.Selection(related="product_id.type", string="Type")
     duration = fields.Float(
         string="Duration", help="To services, duration in hours"
     )

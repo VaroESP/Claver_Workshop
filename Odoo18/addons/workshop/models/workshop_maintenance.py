@@ -1,9 +1,11 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 
 class Maintenance(models.Model):
     _name = "workshop.maintenance"
     _description = "Workshop Maintenance"
+    _inherit = ["mail.thread", "mail.activity.mixin"]  # Agregado para seguimiento
 
     # == FIELDS == #
 
@@ -13,17 +15,29 @@ class Maintenance(models.Model):
     date_end = fields.Datetime(string="Date end")
     date_delivery = fields.Datetime(string="Date delivery")
     customer_id = fields.Many2one(
-        "workshop.customer", string="Customer", required=True
+        "res.partner",
+        string="Customer",
+        required=True,
+        domain=[("is_workshop_customer", "=", True)],
+        default=lambda self: self.env.user.partner_id.id,
     )
-    vehicle_id = fields.Many2one(
-        "workshop.vehicle", string="Vehicle", required=True
-    )
+    vehicle_id = fields.Many2one("workshop.vehicle", string="Vehicle", required=True)
     product_ids = fields.Many2many(
-        comodel_name="workshop.product",
-        string="Products",
+        comodel_name="product.product",
+        string="Products Used",
+        domain="[('is_workshop_product', '=', True)]",
     )
     mechanic_id = fields.Many2one(
-        comodel_name="workshop.employee", string="Mechanic", required=True
+        comodel_name="hr.employee",
+        string="Mechanic",
+        required=True,
+        domain=[
+            ("is_workshop_employee", "=", True),
+            ("employee_type", "in", ["mechanic", "workshop_manager"]),
+        ],
+        default=lambda self: (
+            self.env.user.employee_id.id
+        ),
     )
     state = fields.Selection(
         [
@@ -38,14 +52,17 @@ class Maintenance(models.Model):
         ],
         string="State",
         default="draft",
-        tracking=True,
     )
     priority = fields.Selection(
         [("low", "Low"), ("normal", "Normal"), ("high", "High"), ("urgent", "Urgent")],
         string="Priority",
         default="normal",
     )
-    problem_description = fields.Text(string="Problems description", required=True)
+    problem_description = fields.Text(
+        string="Problems description",
+        required=True,
+        default="Problema reportado por el cliente",
+    )
     diagnosis = fields.Text(string="Diagnosis")
     internal_notes = fields.Text(string="Internal notes")
     customer_notes = fields.Text(string="Customer notes")
@@ -65,9 +82,30 @@ class Maintenance(models.Model):
     )
 
     invoice_id = fields.Many2one("account.move", string="Invoice", readonly=True)
-    invoiced_amount = fields.Float(
-        string="Invoice amount", related="invoice_id.amount_total"
+    invoiced_amount = fields.Monetary(
+        string="Invoice amount",
+        related="invoice_id.amount_total",
+        currency_field="currency_id",
     )
+    currency_id = fields.Many2one(
+        "res.currency",
+        string="Currency",
+        default=lambda self: self.env.company.currency_id,
+    )
+
+    # == CONSTRAINTS == #
+
+    @api.constrains("km_at_entry", "km_at_exit")
+    def _check_kilometers(self):
+        for record in self:
+            if (
+                record.km_at_exit
+                and record.km_at_entry
+                and record.km_at_exit < record.km_at_entry
+            ):
+                raise ValidationError(
+                    "Exit kilometers cannot be less than entry kilometers!"
+                )
 
     # == CRUD METHODS == #
 
@@ -105,10 +143,65 @@ class Maintenance(models.Model):
 
         return super(Maintenance, self).create(vals)
 
-    # Completar método _compute_totals:
-    @api.depends('line_ids.price_subtotal', 'line_ids.duration')
+    @api.depends("line_ids.price_subtotal", "line_ids.duration")
     def _compute_totals(self):
         for record in self:
-            record.total_hours = sum(record.line_ids.mapped('duration'))
-            record.total_parts = sum(record.line_ids.filtered(lambda l: l.product_type == 'product').mapped('price_subtotal'))
-            record.total_amount = sum(record.line_ids.mapped('price_subtotal'))
+            service_lines = record.line_ids.filtered(
+                lambda l: l.product_type == "service"
+            )
+            record.total_hours = sum(service_lines.mapped("duration"))
+
+            product_lines = record.line_ids.filtered(
+                lambda l: l.product_type == "product"
+            )
+            record.total_parts = sum(product_lines.mapped("price_subtotal"))
+
+            record.total_amount = sum(record.line_ids.mapped("price_subtotal"))
+
+    # == ACTION METHODS == #
+
+    def action_confirm(self):
+        self.write({"state": "confirmed"})
+
+    def action_start(self):
+        self.write({"state": "in_progress", "date_start": fields.Datetime.now()})
+
+    def action_complete(self):
+        self.write({"state": "quality_check", "date_end": fields.Datetime.now()})
+
+    def action_quality_approve(self):
+        self.write({"state": "ready"})
+
+    def action_deliver(self):
+        self.write({"state": "delivered", "date_delivery": fields.Datetime.now()})
+
+    def action_cancel(self):
+        self.write({"state": "cancelled"})
+
+    def action_create_invoice(self):
+        invoice = self.env["account.move"].create(
+            {
+                "partner_id": self.customer_id.id,
+                "move_type": "out_invoice",
+                "invoice_date": fields.Date.today(),
+                "invoice_line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "name": f"Mantenimiento {self.name}",
+                            "quantity": 1,
+                            "price_unit": self.total_amount,
+                        },
+                    )
+                ],
+            }
+        )
+        self.write({"state": "invoiced", "invoice_id": invoice.id})
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "account.move",
+            "res_id": invoice.id,
+            "view_mode": "form",
+            "target": "current",
+        }

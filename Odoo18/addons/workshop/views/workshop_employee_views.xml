@@ -2,7 +2,7 @@
     <!-- Kanban view -->
     <record id="view_workshop_employee_kanban" model="ir.ui.view">
         <field name="name">workshop.employee.kanban</field>
-        <field name="model">workshop.employee</field>
+        <field name="model">hr.employee</field>
         <field eval="1" name="priority" />
         <field name="arch" type="xml">
             <kanban>
@@ -40,7 +40,7 @@
     <!-- List view -->
     <record id="view_workshop_employee_list" model="ir.ui.view">
         <field name="name">workshop.employee.list</field>
-        <field name="model">workshop.employee</field>
+        <field name="model">hr.employee</field>
         <field name="arch" type="xml">
             <list name="Employees">
                 <field name="name" />
@@ -53,7 +53,7 @@
     <!-- Form view -->
     <record id="view_workshop_employee_form" model="ir.ui.view">
         <field name="name">workshop.employee.form</field>
-        <field name="model">workshop.employee</field>
+        <field name="model">hr.employee</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -81,8 +81,10 @@
                                     <field name="city" placeholder="City" />
                                 </div>
                                 <div class="col-6 o_row">
-                                    <field name="state_id" placeholder="State" />
-                                    <field name="country_id" placeholder="Country" />
+                                    <field name="state_id" placeholder="State"
+                                        groups="hr.group_hr_user" />
+                                    <field name="country_id" placeholder="Country"
+                                        groups="hr.group_hr_user" />
                                 </div>
                             </div>
                         </group>
@@ -95,7 +97,7 @@
     <!-- Action views -->
     <record id="action_employee" model="ir.actions.act_window">
         <field name="name">Employees</field>
-        <field name="res_model">workshop.employee</field>
+        <field name="res_model">hr.employee</field>
         <field name="view_mode">list,form,kanban</field>
         <field name="view_id" ref="view_workshop_employee_kanban" />
     </record>

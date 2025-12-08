@@ -11,23 +11,22 @@ class Employee(models.Model):
 
     # == FIELDS == #
 
-    #name = fields.Char(string="Name", required=True)
-    is_worshop_employee = fields.Boolean(string="Workshop employee")
-    #street = fields.Char(string="Street")
-    #postal_code = fields.Char(string="Postal Code")
-    #city = fields.Char(string="City")
-    '''state_id = fields.Many2one(
+    is_workshop_employee = fields.Boolean(string="Workshop employee")
+    street = fields.Char(string="Street")
+    postal_code = fields.Char(string="Postal Code")
+    city = fields.Char(string="City")
+    state_id = fields.Many2one(
         "res.country.state",
         string="State",
         ondelete="restrict",
         domain="[('country_id', '=?', country_id)]",
         store=True,
-    )'''
-    '''country_id = fields.Many2one(
+    )
+    country_id = fields.Many2one(
         "res.country", string="Country", ondelete="restrict", store=True
-    )'''
-    #phone = fields.Char(string="Phone")
-    #email = fields.Char(string="Email")
+    )
+    # phone = fields.Char(string="Phone")
+    # email = fields.Char(string="Email")
     avatar_128 = fields.Image(
         string="avatar 128",
         max_width=128,
@@ -36,23 +35,24 @@ class Employee(models.Model):
         default=lambda self: self._get_default_avatar(),
     )
     user_id = fields.Many2one("res.users", string="UserId")
-    employee_type = fields.Selection([
-        ('mechanic', 'Mechanic'),
-        ('apprentice', 'Apprentice'),
-        ('administrative', 'Administrative'),
-        ('workshop_manager', 'Workshop Manager'),
-    ], string="Employee type", default="mechanic")
-    is_available = fields.Boolean(string='Available', default=True)
-    maintenance_ids = fields.One2many('workshop.maintenance', 'mechanic_id', string="Mechanic's maintenances")
-
-    # == ONCHANGE METHODS == #
-
-    @api.onchange("state_id")
-    def _onchange_state(self):
-        if self.state_id:
-            self.country_id = self.state_id.country_id
-        else:
-            self.country_id = False
+    employee_type = fields.Selection(
+        selection_add=[
+            ("mechanic", "Mechanic"),
+            ("apprentice", "Apprentice"),
+            ("administrative", "Administrative"),
+            ("workshop_manager", "Workshop Manager"),
+        ],
+        ondelete={
+            "mechanic": "cascade",
+            "apprentice": "cascade",
+            "administrative": "cascade",
+            "workshop_manager": "cascade",
+        },
+    )
+    is_available = fields.Boolean(string="Available", default=True)
+    maintenance_ids = fields.One2many(
+        "workshop.maintenance", "mechanic_id", string="Mechanic's maintenances"
+    )
 
     # == HELPERS METHODS == #
 
@@ -128,7 +128,8 @@ class Employee(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        employees = super(Employee, self).create(vals_list)
+        employees = super().create(vals_list)
         for employee in employees:
-            employee._create_user_from_employee()
+            if employee.email:
+                employee._create_user_from_employee()
         return employees

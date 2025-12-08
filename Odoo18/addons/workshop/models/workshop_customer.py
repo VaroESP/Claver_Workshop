@@ -11,29 +11,28 @@ class Customer(models.Model):
 
     # == FIELDS == #
 
-    #name = fields.Char(string="Name", required=True)
-    is_worshop_customer = fields.Boolean(string="Workshop customer", default=True)
+    is_workshop_customer = fields.Boolean(string="Workshop customer", default=True)
     vat = fields.Char(string="VAT")
     customer_type = fields.Selection(
         [("individual", "Individual"), ("company", "Company")],
         string="Type of customer",
         default="individual",
     )
-    #street = fields.Char(string="Street")
-    #postal_code = fields.Char(string="Postal Code")
-    #city = fields.Char(string="City")
-    '''state_id = fields.Many2one(
+    street = fields.Char(string="Street")
+    postal_code = fields.Char(string="Postal Code")
+    city = fields.Char(string="City")
+    state_id = fields.Many2one(
         "res.country.state",
         string="State",
         ondelete="restrict",
         domain="[('country_id', '=?', country_id)]",
         store=True,
-    )'''
-    '''country_id = fields.Many2one(
+    )
+    country_id = fields.Many2one(
         "res.country", string="Country", ondelete="restrict", store=True
-    )'''
-    #phone = fields.Char(string="Phone")
-    #email = fields.Char(string="Email")
+    )
+    # phone = fields.Char(string="Phone")
+    # email = fields.Char(string="Email")
     avatar_128 = fields.Image(
         string="avatar 128",
         max_width=128,
@@ -50,15 +49,6 @@ class Customer(models.Model):
     )
     vehicle_count = fields.Integer(string="Vehicles", compute="_compute_count")
     maintenance_count = fields.Integer(string="Maintenances", compute="_compute_count")
-
-    # == ONCHANGE METHODS == #
-
-    @api.onchange("state_id")
-    def _onchange_state(self):
-        if self.state_id:
-            self.country_id = self.state_id.country_id
-        else:
-            self.country_id = False
 
     # == COMPUTED METHODS == #
 
@@ -152,7 +142,7 @@ class Customer(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        customers = super(Customer, self).create(vals_list)
+        customers = super().create(vals_list)
         for customer in customers:
             if customer.email:
                 customer._create_user_from_customer()
