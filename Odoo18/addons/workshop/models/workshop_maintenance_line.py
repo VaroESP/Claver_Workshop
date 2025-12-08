@@ -9,7 +9,10 @@ class WorkshopMaintenanceLine(models.Model):
         "workshop.maintenance", string="Maintenance", ondelete="cascade"
     )
     product_id = fields.Many2one(
-        "product.product", string="Product", required=True
+        "product.product",
+        string="Product",
+        required=True,
+        domain="[('is_workshop_product', '=', True)]",
     )
     name = fields.Char(string="Name", required=True)
     quantity = fields.Float(string="Quantity", default=1.0)
@@ -19,9 +22,7 @@ class WorkshopMaintenanceLine(models.Model):
     )
 
     product_type = fields.Selection(related="product_id.type", string="Type")
-    duration = fields.Float(
-        string="Duration", help="To services, duration in hours"
-    )
+    duration = fields.Float(string="Duration", help="To services, duration in hours")
 
     @api.depends("quantity", "unit_price")
     def _compute_subtotal(self):

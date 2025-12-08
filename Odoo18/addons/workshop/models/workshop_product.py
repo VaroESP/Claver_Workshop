@@ -8,7 +8,7 @@ class Product(models.Model):
 
     # == FIELDS == #
 
-    is_workshop_product = fields.Boolean(string="Workshop product", default=False)
+    is_workshop_product = fields.Boolean(string="Workshop product", default=True)
     min_stock = fields.Integer(string="Minimum stock", default=0)
     max_stock = fields.Integer(string="Maximum stock", default=0)
     maintenance_ids = fields.Many2many(

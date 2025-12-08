@@ -48,6 +48,7 @@ class Employee(models.Model):
             "administrative": "cascade",
             "workshop_manager": "cascade",
         },
+        default="mechanic"
     )
     is_available = fields.Boolean(string="Available", default=True)
     maintenance_ids = fields.One2many(
