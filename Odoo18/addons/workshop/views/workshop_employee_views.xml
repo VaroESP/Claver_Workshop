@@ -6,11 +6,12 @@
         <field name="inherit_id" ref="hr.hr_kanban_view_employees" />
         <field eval="1" name="priority" />
         <field name="arch" type="xml">
-            <field name="is_workshop_employee" />
-            <field name="employee_type" />
-            <field name="is_available" />
-
-            <xpath expr="//kanban//templates/t[@t-name='card']" position="replace">
+            <xpath expr="//kanban" position="inside">
+                <field name="is_workshop_employee" />
+                <field name="employee_type" />
+                <field name="is_available" />
+            </xpath>
+            <xpath expr="//kanban//templates/t[@t-name='card']" position="inside">
                 <t t-name="card">
                     <div class="d-flex">
                         <div class="me-2">
@@ -29,11 +30,16 @@
                             <div>
                                 <field name="phone" />
                             </div>
-                            <div t-if="record.is_workshop_employee.value"
+                            <div
+                                t-if="record.is_workshop_employee.value"
                                 class="text-success small">
-                                <i class="fa fa-wrench" /> Taller </div>
-                            <div t-if="record.employee_type.value" class="text-muted small">
+                                <i class="fa fa-wrench" /><span> Workshop </span>
+                            </div>
+                            <div
+                                t-if="record.employee_type.value" class="text-muted small">
                                 <field name="employee_type" />
+                            </div>
+                            <div class="text-danger small"> 
                             </div>
                         </div>
                     </div>
@@ -71,10 +77,11 @@
                 <field name="is_workshop_employee" invisible="1" />
             </xpath>
             <xpath expr="//page[@name='personal_information']//group//group" position="inside">
-                <group string="Taller">
+                <group string="Workshop">
                     <field name="employee_type"
                         required="('is_workshop_employee', '=', True)" />
                     <field name="is_available" />
+                    <field name="is_workshop_employee" />
                 </group>
             </xpath>
             <xpath expr="//notebook" position="inside">
@@ -116,15 +123,11 @@
 
     <!-- Action views -->
     <record id="action_employee" model="ir.actions.act_window">
-        <field name="name">Empleados del Taller</field>
+        <field name="name">Workshop employees</field>
         <field name="res_model">hr.employee</field>
         <field name="view_mode">kanban,list,form</field>
         <!-- DOMINIO AÑADIDO -->
         <field name="domain">[('is_workshop_employee', '=', True)]</field>
-        <field name="context">{
-            'search_default_is_workshop_employee': 1,
-            'default_is_workshop_employee': True
-            }</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 There are no registered workshop employees.

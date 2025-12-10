@@ -11,11 +11,11 @@ class Customer(models.Model):
 
     # == FIELDS == #
 
-    is_workshop_customer = fields.Boolean(string="Workshop customer", default=True)
+    is_workshop_customer = fields.Boolean(string="Workshop customer", default=False)
     vat = fields.Char(string="VAT")
     customer_type = fields.Selection(
         [("individual", "Individual"), ("company", "Company")],
-        string="Type of customer",
+        string="Customer Type",
         default="individual",
     )
     street = fields.Char(string="Street")
@@ -31,16 +31,14 @@ class Customer(models.Model):
     country_id = fields.Many2one(
         "res.country", string="Country", ondelete="restrict", store=True
     )
-    # phone = fields.Char(string="Phone")
-    # email = fields.Char(string="Email")
     avatar_128 = fields.Image(
-        string="avatar 128",
+        string="Avatar 128",
         max_width=128,
         max_height=128,
         store=True,
         default=lambda self: self._get_default_avatar(),
     )
-    user_id = fields.Many2one("res.users", string="UserId")
+    user_id = fields.Many2one("res.users", string="User ID")
     vehicle_ids = fields.One2many(
         "workshop.vehicle", "customer_id", string="Customer's Vehicles"
     )
@@ -114,7 +112,7 @@ class Customer(models.Model):
             return user
 
         except Exception as e:
-            raise ValidationError("Error to create user: %s" % str(e))
+            raise ValidationError("Error creating user: %s" % str(e))
 
     # == ACTION METHODS == #
 

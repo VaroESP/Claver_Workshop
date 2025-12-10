@@ -1,6 +1,10 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class Maintenance(models.Model):
     _name = "workshop.maintenance"
@@ -11,9 +15,10 @@ class Maintenance(models.Model):
 
     name = fields.Char(string="Name", default="New")
     date_request = fields.Date(string="Date request")
-    date_start = fields.Datetime(string="Date Start")
-    date_end = fields.Datetime(string="Date end")
-    date_delivery = fields.Datetime(string="Date delivery")
+    date_start = fields.Date(string="Date Start")
+    date_end = fields.Date(string="Date end")
+    date_delivery = fields.Date(string="Date delivery")
+    kms = fields.Integer(string="Kilometers")
     customer_id = fields.Many2one(
         "res.partner",
         string="Customer",
@@ -31,13 +36,7 @@ class Maintenance(models.Model):
         comodel_name="hr.employee",
         string="Mechanic",
         required=True,
-        domain=[
-            ("is_workshop_employee", "=", True),
-            ("employee_type", "in", ["mechanic", "workshop_manager"]),
-        ],
-        default=lambda self: (
-            self.env.user.employee_id.id
-        ),
+        default=lambda self: (self.env.user.employee_id.id),
     )
     state = fields.Selection(
         [
@@ -60,24 +59,20 @@ class Maintenance(models.Model):
     )
     problem_description = fields.Text(
         string="Problems description",
-        required=True,
-        default="Problema reportado por el cliente",
     )
     diagnosis = fields.Text(string="Diagnosis")
     internal_notes = fields.Text(string="Internal notes")
     customer_notes = fields.Text(string="Customer notes")
-    km_at_entry = fields.Integer(string="KM at entry")
-    km_at_exit = fields.Integer(string="KM at exit")
     line_ids = fields.One2many(
         "workshop.maintenance.line", "maintenance_id", string="Maintenance lines"
     )
     total_hours = fields.Float(
         string="Total hours", compute="_compute_totals", store=True
     )
-    total_parts = fields.Float(
+    total_parts = fields.Monetary(
         string="Total spare parts", compute="_compute_totals", store=True
     )
-    total_amount = fields.Float(
+    total_amount = fields.Monetary(
         string="Total amount", compute="_compute_totals", store=True
     )
 
@@ -91,21 +86,8 @@ class Maintenance(models.Model):
         "res.currency",
         string="Currency",
         default=lambda self: self.env.company.currency_id,
+        required=True,
     )
-
-    # == CONSTRAINTS == #
-
-    @api.constrains("km_at_entry", "km_at_exit")
-    def _check_kilometers(self):
-        for record in self:
-            if (
-                record.km_at_exit
-                and record.km_at_entry
-                and record.km_at_exit < record.km_at_entry
-            ):
-                raise ValidationError(
-                    "Exit kilometers cannot be less than entry kilometers!"
-                )
 
     # == CRUD METHODS == #
 
@@ -143,65 +125,61 @@ class Maintenance(models.Model):
 
         return super(Maintenance, self).create(vals)
 
-    @api.depends("line_ids.price_subtotal", "line_ids.duration")
+    @api.depends('line_ids.price_subtotal', 'line_ids.duration', 'line_ids.product_type')
     def _compute_totals(self):
         for record in self:
             service_lines = record.line_ids.filtered(
-                lambda l: l.product_type == "service"
+                lambda l: l.product_type == 'service'
             )
-            record.total_hours = sum(service_lines.mapped("duration"))
-
-            product_lines = record.line_ids.filtered(
-                lambda l: l.product_type == "product"
+            record.total_hours = sum(service_lines.mapped('duration')) or 0.0
+            
+            parts_lines = record.line_ids.filtered(
+                lambda l: l.product_type == 'consu'
             )
-            record.total_parts = sum(product_lines.mapped("price_subtotal"))
+            record.total_parts = sum(parts_lines.mapped('price_subtotal')) or 0.0
+            
+            record.total_amount = sum(record.line_ids.mapped('price_subtotal')) or 0.0
 
-            record.total_amount = sum(record.line_ids.mapped("price_subtotal"))
-
+    # == ONCHANGE METHODS == #
+    
+    @api.onchange('kms')
+    def _onchange_kms(self):
+        for record in self:
+            if record.vehicle_id and record.kms:
+                record.vehicle_id.write({
+                    'kms': record.kms
+                })
+                
     # == ACTION METHODS == #
 
     def action_confirm(self):
         self.write({"state": "confirmed"})
 
     def action_start(self):
-        self.write({"state": "in_progress", "date_start": fields.Datetime.now()})
+        self.write({"state": "in_progress", "date_start": fields.Date.today()})
 
     def action_complete(self):
-        self.write({"state": "quality_check", "date_end": fields.Datetime.now()})
+        self.write({"state": "quality_check", "date_end": fields.Date.today()})
 
     def action_quality_approve(self):
         self.write({"state": "ready"})
 
-    def action_deliver(self):
-        self.write({"state": "delivered", "date_delivery": fields.Datetime.now()})
+    def action_delivery(self):
+        self.write({"state": "delivered", "date_delivery": fields.Date.today()})
 
     def action_cancel(self):
         self.write({"state": "cancelled"})
 
     def action_create_invoice(self):
-        invoice = self.env["account.move"].create(
-            {
-                "partner_id": self.customer_id.id,
-                "move_type": "out_invoice",
-                "invoice_date": fields.Date.today(),
-                "invoice_line_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "name": f"Mantenimiento {self.name}",
-                            "quantity": 1,
-                            "price_unit": self.total_amount,
-                        },
-                    )
-                ],
-            }
-        )
-        self.write({"state": "invoiced", "invoice_id": invoice.id})
+        """Generar PDF de factura"""
+        self.write({'state': 'invoiced'})
+        
         return {
-            "type": "ir.actions.act_window",
-            "res_model": "account.move",
-            "res_id": invoice.id,
-            "view_mode": "form",
-            "target": "current",
+            'type': 'ir.actions.act_url',
+            'url': f'/report/pdf/workshop.workshop_maintenance_report_template/{self.id}',
+            'target': 'new',
         }
+
+    def action_print_invoice(self):
+        """Alternativa para imprimir"""
+        return self.action_create_invoice()

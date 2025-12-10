@@ -26,7 +26,7 @@
         <field name="name">workshop.maintenance.kanban</field>
         <field name="model">workshop.maintenance</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="state">
+            <kanban default_group_by="state" group_expand="true">
                 <field name="name" />
                 <field name="vehicle_id" />
                 <field name="customer_id" />
@@ -82,8 +82,11 @@
                         class="btn-primary" />
                     <button name="action_quality_approve" string="Quality Approve" type="object"
                         class="btn-primary" />
-                    <button name="action_deliver" string="Deliver" type="object" class="btn-primary" />
-                    <button name="action_create_invoice" string="Create Invoice" type="object"
+                    <button name="action_delivery" string="Delivery" type="object"
+                        class="btn-primary" />
+                    <button name="action_print_invoice"
+                        string="Print PDF"
+                        type="object"
                         class="btn-secondary" />
                     <button name="action_cancel" string="Cancel" type="object" class="btn-secondary" />
                     <field name="state" widget="statusbar"
@@ -112,7 +115,8 @@
                         <group>
                             <field name="customer_id" />
                             <field name="vehicle_id" />
-                            <field name="mechanic_id" />
+                            <field name="mechanic_id"
+                                domain="[('is_workshop_employee', '=', True), ('employee_type', 'in', ['mechanic', 'workshop_manager'])]" />
                         </group>
                         <group>
                             <field name="date_request" />
@@ -124,12 +128,10 @@
 
                     <group>
                         <group>
-                            <field name="km_at_entry" />
-                            <field name="km_at_exit" />
+                            <field name="kms" />
                         </group>
                         <group>
-                            <field name="total_hours" />
-                            <field name="total_parts" widget="monetary" />
+                            <field name="total_hours" widget="monetary" />
                             <field name="total_amount" widget="monetary" />
                         </group>
                     </group>
@@ -138,26 +140,24 @@
                         <page string="Problem &amp; Diagnosis">
                             <group>
                                 <group>
-                                    <field name="problem_description" nolabel="1"
-                                        placeholder="Describe the problem reported by the customer..." />
+                                    <field name="problem_description"
+                                        placeholder="The problem reported by the customer..." />
                                 </group>
                                 <group>
-                                    <field name="diagnosis" nolabel="1"
+                                    <field name="diagnosis"
                                         placeholder="Mechanic's diagnosis..." />
                                 </group>
                             </group>
                         </page>
 
-                        <page string="Maintenance Lines">
+                        <page string="Products">
                             <field name="line_ids">
                                 <list editable="bottom" string="Maintenance Lines">
                                     <field name="product_id"
                                         domain="[('is_workshop_product', '=', True)]" />
-                                    <field name="name" />
                                     <field name="quantity" />
                                     <field name="unit_price" />
-                                    <field name="duration"
-                                        invisible="('product_type', '!=', 'service')" />
+                                    <field name="duration" />
                                     <field name="price_subtotal" widget="monetary" />
                                     <field name="product_type" invisible="1" />
                                 </list>
@@ -166,7 +166,6 @@
                                         <group>
                                             <field name="product_id"
                                                 domain="[('is_workshop_product', '=', True)]" />
-                                            <field name="name" />
                                             <field name="quantity" />
                                             <field name="unit_price" />
                                             <field name="duration"
@@ -175,26 +174,37 @@
                                     </sheet>
                                 </form>
                             </field>
-                        </page>
-
-                        <page string="Products Used" name="products">
-                            <field name="product_ids">
-                                <list>
-                                    <field name="name" />
-                                    <field name="default_code" />
-                                    <field name="qty_available" string="Stock" />
-                                </list>
-                            </field>
+                            <div class="oe_subtotal_footer">
+                                <table class="oe_subtotal_footer_separator" width="100%">
+                                    <tbody>
+                                        <tr class="oe_subtotal_footer_separator">
+                                            <td width="50%"></td>
+                                            <td class="text-end" width="25%">
+                                                <b>TOTAL:</b>
+                                            </td>
+                                            <td class="text-end" width="25%">
+                                                <strong>
+                                                    <field name="total_amount"
+                                                        widget="monetary"
+                                                        readonly="1"
+                                                        nolabel="1"
+                                                        class="oe_subtotal_footer_separator" />
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </page>
 
                         <page string="Notes">
                             <group>
                                 <group>
-                                    <field name="internal_notes" nolabel="1"
+                                    <field name="internal_notes"
                                         placeholder="Internal notes for workshop staff..." />
                                 </group>
                                 <group>
-                                    <field name="customer_notes" nolabel="1"
+                                    <field name="customer_notes"
                                         placeholder="Notes to share with customer..." />
                                 </group>
                             </group>

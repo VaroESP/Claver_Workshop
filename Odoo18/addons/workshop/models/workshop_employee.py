@@ -11,7 +11,7 @@ class Employee(models.Model):
 
     # == FIELDS == #
 
-    is_workshop_employee = fields.Boolean(string="Workshop employee")
+    is_workshop_employee = fields.Boolean(string="Workshop employee", default=False)
     street = fields.Char(string="Street")
     postal_code = fields.Char(string="Postal Code")
     city = fields.Char(string="City")
@@ -25,16 +25,14 @@ class Employee(models.Model):
     country_id = fields.Many2one(
         "res.country", string="Country", ondelete="restrict", store=True
     )
-    # phone = fields.Char(string="Phone")
-    # email = fields.Char(string="Email")
     avatar_128 = fields.Image(
-        string="avatar 128",
+        string="Avatar 128",
         max_width=128,
         max_height=128,
         store=True,
         default=lambda self: self._get_default_avatar(),
     )
-    user_id = fields.Many2one("res.users", string="UserId")
+    user_id = fields.Many2one("res.users", string="User ID")
     employee_type = fields.Selection(
         selection_add=[
             ("mechanic", "Mechanic"),
@@ -48,11 +46,11 @@ class Employee(models.Model):
             "administrative": "cascade",
             "workshop_manager": "cascade",
         },
-        default="mechanic"
+        default="mechanic",
     )
     is_available = fields.Boolean(string="Available", default=True)
     maintenance_ids = fields.One2many(
-        "workshop.maintenance", "mechanic_id", string="Mechanic's maintenances"
+        "workshop.maintenance", "mechanic_id", string="Mechanic's Maintenances"
     )
 
     # == HELPERS METHODS == #
@@ -123,7 +121,7 @@ class Employee(models.Model):
             return user
 
         except Exception as e:
-            raise ValidationError("No se pudo crear el usuario: %s" % str(e))
+            raise ValidationError("Could not create user: %s" % str(e))
 
     # == CRUD METHODS == #
 

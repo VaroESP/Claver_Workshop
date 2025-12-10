@@ -71,7 +71,7 @@ class Vehicle(models.Model):
                 ).sorted(key=lambda m: m.date_end, reverse=True)
 
                 if last_maintenance:
-                    record.last_maintenance = last_maintenance[0].date_end.date()
+                    record.last_maintenance = last_maintenance[0].date_end
                 else:
                     record.last_maintenance = False
             else:
