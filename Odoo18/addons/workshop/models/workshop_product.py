@@ -8,7 +8,7 @@ class Product(models.Model):
 
     # == FIELDS == #
 
-    is_workshop_product = fields.Boolean(string="Workshop product", default=True)
+    is_workshop_product = fields.Boolean(string="Workshop product", default=False)
     maintenance_ids = fields.Many2many(
         comodel_name="workshop.maintenance",
         string="Maintenances",

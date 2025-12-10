@@ -8,7 +8,7 @@
                     <div class="page">
                         <!-- Header -->
                         <div class="row mb-4">
-                            <div class="col-6 text-right">
+                            <div class="col-12 text-end">
                                 <div style="font-size: 20px; font-weight: bold; color: #2C3E50;">
                                     INVOICE
                                 </div>
@@ -32,8 +32,9 @@
 
                         <!-- Customer -->
                         <div class="row mb-4">
-                            <div class="col-12 text-align: right">
-                                <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">
+                            <div class="col-6">
+                                <div
+                                    style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">
                                     CUSTOMER
                                 </div>
                                 <div style="font-size: 12px;">
@@ -54,12 +55,11 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Vehicle -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">
+                            <!-- Vehicle -->
+                            <div class="col-6 text-end">
+                                <div
+                                    style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">
                                     VEHICLE
                                 </div>
                                 <div style="font-size: 12px;">
